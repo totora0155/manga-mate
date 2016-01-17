@@ -1,0 +1,33 @@
+{
+  "name": "manga-mate",
+  "version": "0.0.1",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron main.js",
+    "build": "electron-packager . \"Manga Mate\" --platform=darwin --arch=x64 --version=0.36.0 --overwrite",
+    "firstbuild": "electron-packager . \"Manga Mate\" --platform=darwin --arch=x64 --version=0.36.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/totora0155/manga-mate.git"
+  },
+  "keywords": [
+    "color"
+  ],
+  "author": "nju33",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/totora0155/manga-mate/issues"
+  },
+  "homepage": "https://github.com/totora0155/manga-mate#readme",
+  "devDependencies": {
+    "electron-prebuilt": "^0.36.0"
+  },
+  "dependencies": {
+    "co": "^4.6.0",
+    "glob": "^6.0.4",
+    "lodash": "^4.0.0",
+    "mkdirp": "^0.5.1"
+  }
+}
