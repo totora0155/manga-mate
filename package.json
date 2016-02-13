@@ -21,13 +21,12 @@
     "url": "https://github.com/totora0155/manga-mate/issues"
   },
   "homepage": "https://github.com/totora0155/manga-mate#readme",
-  "devDependencies": {
-    "electron-prebuilt": "^0.36.0"
-  },
+  "devDependencies": {},
   "dependencies": {
     "co": "^4.6.0",
-    "glob": "^6.0.4",
-    "lodash": "^4.0.0",
+    "electron-prebuilt": "^0.36.7",
+    "glob": "^7.0.0",
+    "lodash": "^4.3.0",
     "mkdirp": "^0.5.1"
   }
 }
