@@ -185,15 +185,26 @@ ul {
   font-weight: bold;
 }
 
+.reader__box {
+  width: 100vw;
+  height: 100vh;
+  /*position: absolute;*/
+  /*right: 50%;*/
+  /*bottom: 50%;*/
+  /*transform: translate(50%, 50%);*/
+}
+
 .reader__main {
   display: flex;
   background: url(images/background.png);
+  transform-origin: center center;
+  height: 100%;
 }
 
 .reader__left,
 .reader__right {
   flex: 1 1 50vw;
-  height: 100vh;
+  height: 100%;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: 50% 50%;
@@ -209,7 +220,6 @@ ul {
 
 .btn__icon:hover {
   opacity: 1;
-  /*border-color: currentColor;*/
   background: #fff;
   box-shadow: 0 1px 3px -1px hsla(0, 0%, 0%, .3);
 }

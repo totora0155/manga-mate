@@ -12,6 +12,7 @@ let current = null;
 class Reader extends View {
   constructor(id) {
     super(id);
+    this.inner = this.el.querySelector('#readerInner');
     this.left = this.el.querySelector('#readerLeft');
     this.right = this.el.querySelector('#readerRight');
     this.bindKeyHandler = _bindKeyHandler.bind(this);
@@ -110,21 +111,39 @@ function _swipeHandler() {
     return innerHeight === document.body.clientHeight;
   };
   let executed = false;
-  const fn = _.throttle((e) => {
-    if (isZoom()) {
-      if (Math.abs(e.deltaX) < 20) {
-        executed = false;
-      } else if (!executed) {
-        if (e.deltaX < -60) {
-          executed = true;
-          this.next();
-        } else if (e.deltaX > 60) {
-          executed = true;
-          this.prev();
-        }
+  let scale = 100;
+  let swipe = _.throttle((e) => {
+    if (Math.abs(e.deltaX) < 20) {
+      executed = false;
+    } else if (!executed) {
+      if (e.deltaX < -60) {
+        executed = true;
+        this.next();
+      } else if (e.deltaX > 60) {
+        executed = true;
+        this.prev();
       }
     }
   }, 80);
+
+  let timeout = null;
+
+  const fn = (e) => {
+    if (isZoom()) {
+      swipe(e);
+    }
+
+    // if (e.ctrlKey) {
+    //   scale += e.deltaY / 10;
+    //   if (scale < 100) scale = 100;
+    //   this.el.style.cssText = `width: ${scale}vw; height: ${scale}vh`;
+    //   console.log(this.el.clientHeight);
+    //   const width = this.el.clientWidth / 4;
+    //   const height = this.el.clientHeight / 4;
+    //   console.log(width, height);
+    //   scroll(width, height);
+    // }
+  }
   return fn;
 }
 
