@@ -1,5 +1,7 @@
 'use strict';
-const remote = require('remote');
+const electron = require('electron');
+const remote = electron.remote;
+const webFrame = electron.webFrame;
 const app = remote.app;
 const co = require('co');
 const View = require('./view');
@@ -104,19 +106,27 @@ function _bindKeyHandler(e) {
 }
 
 function _swipeHandler() {
+  const isZoom = () => {
+    return innerHeight === document.body.clientHeight;
+  };
   let executed = false;
   const fn = _.throttle((e) => {
-    if (Math.abs(e.deltaX) < 20) {
-      executed = false;
-    } else if (!executed) {
-      if (e.deltaX < -60) {
-        executed = true;
-        this.next();
-      } else if (e.deltaX > 60) {
-        executed = true;
-        this.prev();
+    if (isZoom()) {
+      if (Math.abs(e.deltaX) < 20) {
+        executed = false;
+      } else if (!executed) {
+        if (e.deltaX < -60) {
+          executed = true;
+          this.next();
+        } else if (e.deltaX > 60) {
+          executed = true;
+          this.prev();
+        }
       }
     }
   }, 80);
   return fn;
+}
+
+function zoomHandler() {
 }
