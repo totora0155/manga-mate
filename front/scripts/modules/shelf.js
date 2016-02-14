@@ -72,9 +72,7 @@ class Shelf extends View {
     _.forEach(this.starBtns, (_btn) => {
       let btn = _btn;
       btn.addEventListener('click', () => {
-        _.forEach(this.starBtns, (a) => {
-          a.classList.remove('shelf__disp__star--active');
-        });
+        this.setStar(0);
         btn.classList.add('shelf__disp__star--active');
         store.getManga(store.state.name).state.star = btn.dataset.star;
         store.save();
@@ -112,27 +110,22 @@ class Shelf extends View {
         _this.disp.style.cssText =
           `background-image: url(file://${paths[currentPage || 1]})`;
         _this.title.innerText = manga.name;
-        if (manga.state.star) {
-          _this.el.querySelector(`[data-star="${manga.state.star}"]`)
-            .classList.add('shelf__disp__star--active');
-        }
+        _this.setStar(manga.state.star || 0);
         store.state.name = manga.name;
         currentPage === 1
-          ? this.halfwayBtn.classList.add('hidden')
-          : this.halfwayBtn.classList.remove('hidden');
-        this.beginningBtn.classList.remove('hidden');
+          ? _this.halfwayBtn.classList.add('hidden')
+          : _this.halfwayBtn.classList.remove('hidden');
+        _this.beginningBtn.classList.remove('hidden');
         store.save();
         _this.render();
       });
     } else {
       return co(function* () {
+        _this.setStar(0);
         _this.disp.style.cssText = '';
         _this.title.innerText = '';
-        _.forEach(_this.starBtns, (btn) => {
-          btn.classList.remove('shelf__disp__star--active');
-        });
-        this.halfwayBtn.classList.add('hidden');
-        this.beginningBtn.classList.add('hidden');
+        _this.halfwayBtn.classList.add('hidden');
+        _this.beginningBtn.classList.add('hidden');
         store.state.name = '';
       });
     }
@@ -175,6 +168,19 @@ class Shelf extends View {
     this.startEvent();
     this.render();
     this.init();
+  }
+
+  setStar(starId) {
+    removeStar.call(this);
+    if (starId > 0) {
+      this.el.querySelector(`[data-star="${starId}"]`)
+        .classList.add('shelf__disp__star--active');
+    }
+    function removeStar() {
+      _.forEach(this.starBtns, (btn) => {
+        btn.classList.remove('shelf__disp__star--active');
+      });
+    }
   }
 }
 
