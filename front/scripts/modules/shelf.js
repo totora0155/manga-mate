@@ -2,8 +2,8 @@
 const path = require('path');
 const EventEmitter = require('events');
 const remote = require('remote');
-const win = remote.getCurrentWindow();
 const dialog = remote.dialog;
+const win = remote.getCurrentWindow();
 const _ = require('lodash');
 const co = require('co');
 const View = require('./view');
@@ -16,11 +16,16 @@ class Shelf extends View {
     this.addBtn = this.el.querySelector('#shelfAddBtn');
     this.list = this.el.querySelector('#shelfList');
     this.disp = this.el.querySelector('#shelfDisp');
+    this.title = this.el.querySelector('#shelfTitle');
+    this.halfwayBtn = this.el.querySelector('#halfwayBtn');
+    this.beginningBtn = this.el.querySelector('#beginningBtn');
+    this.starBtns = this.el.querySelectorAll('.icon__star');
+    this.delBtn = this.el.querySelector('.icon__del');
     this.items = null;
   }
 
   render() {
-    const self = this;
+    const _this = this;
     const markup = _.template(`
 <% _.forEach(mangas, manga => { %>
 <li class="shelf__item">
@@ -33,19 +38,16 @@ class Shelf extends View {
     `)({mangas: store.mangas, state: store.state});
     this.list.innerHTML = markup;
     const els = this.el.querySelectorAll('.shelf__a');
-    var singleClickTimer, clickCount = 0;
-    _.forEach(els, el => {
-      el.addEventListener('click', e => {
-        clickCount++;
-        if (clickCount === 1) {
-          singleClickTimer = setTimeout(function() {
-            clickCount = 0;
-            singleClick.bind(self)(e.target.dataset.name);
-          }, 200);
-        } else if (clickCount === 2) {
+    let singleClickTimer = null;
+    _.forEach(els, (el) => {
+      el.addEventListener('click', (e) => {
+        if (singleClickTimer == null) {
+          singleClickTimer = setTimeout(() => {
+            singleClick.call(_this, e.target.dataset.name);
+          }, 180);
+        } else {
           clearTimeout(singleClickTimer);
-          clickCount = 0;
-          doubleClick.bind(self)(e.target.dataset.name);
+          doubleClick.call(_this, e.target.dataset.name);
         }
       });
     });
@@ -57,32 +59,98 @@ class Shelf extends View {
       this.hidden();
       this.emit('read', manga);
     }
+    this.halfwayBtn.addEventListener('click', () => {
+      const manga = _.find(store.mangas, {name: store.state.name});
+      this.hidden();
+      this.emit('read', manga);
+    });
+    this.beginningBtn.addEventListener('click', () => {
+      const manga = _.find(store.mangas, {name: store.state.name});
+      this.hidden();
+      this.emit('read', manga, true);
+    });
+    _.forEach(this.starBtns, (_btn) => {
+      let btn = _btn;
+      btn.addEventListener('click', () => {
+        _.forEach(this.starBtns, (a) => {
+          a.classList.remove('shelf__disp__star--active');
+        });
+        btn.classList.add('shelf__disp__star--active');
+        store.getManga(store.state.name).state.star = btn.dataset.star;
+        store.save();
+      });
+    });
+    this.delBtn.addEventListener('click', () => {
+      dialog.showMessageBox(win, {
+        type: 'question',
+        buttons: ['はい', 'いいえ'],
+        message: `「${store.state.name}」を削除します。\nよろしいですか？`,
+      }, (idx) => {
+        if (idx === 0) {
+          const targetIdx = _.findIndex(store.mangas, {name: store.state.name});
+          store.mangas.splice(targetIdx, 1);
+          const manga = store.mangas[targetIdx]
+                            ? store.mangas[targetIdx]
+                            : store.mangas[targetIdx-1] || null
+          this.setManga(manga ? manga.name : '')
+            .then(() => {
+              this.render()
+            });
+          store.save();
+        }
+      });
+    });
   }
 
   setManga(name) {
-    const self = this;
+    const _this = this;
     const manga = _.find(store.mangas, {name});
-    co(function* () {
-      const paths = yield util.getFilePaths(manga.dirPath);
-      self.disp.style.cssText = `background-image: url(file://${paths[0]})`;
-      store.state.name = manga.name;
-      store.save();
-      self.render();
-    });
+    if (manga) {
+      return co(function* () {
+        const paths = yield util.getFilePaths(manga.dirPath);
+        const currentPage = manga.state.currentPage;
+        _this.disp.style.cssText =
+          `background-image: url(file://${paths[currentPage || 1]})`;
+        _this.title.innerText = manga.name;
+        if (manga.state.star) {
+          _this.el.querySelector(`[data-star="${manga.state.star}"]`)
+            .classList.add('shelf__disp__star--active');
+        }
+        store.state.name = manga.name;
+        currentPage === 1
+          ? this.halfwayBtn.classList.add('hidden')
+          : this.halfwayBtn.classList.remove('hidden');
+        this.beginningBtn.classList.remove('hidden');
+        store.save();
+        _this.render();
+      });
+    } else {
+      return co(function* () {
+        _this.disp.style.cssText = '';
+        _this.title.innerText = '';
+        _.forEach(_this.starBtns, (btn) => {
+          btn.classList.remove('shelf__disp__star--active');
+        });
+        this.halfwayBtn.classList.add('hidden');
+        this.beginningBtn.classList.add('hidden');
+        store.state.name = '';
+      });
+    }
   }
 
   init() {
     this.setManga(store.state.name);
   }
 
-  addManga() {
+  addManga(cb) {
     const self = this;
     dialog.showOpenDialog(win, {
       properties: ['openDirectory'],
       filters: [
         {name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'gif']},
       ]
-    }, dirPath => {
+    }, (dirPath) => {
+      if (dirPath == null) return;
       const manga = {
         name: dirPath[0].split(path.sep).slice(-1)[0],
         dirPath: dirPath[0],
@@ -92,7 +160,9 @@ class Shelf extends View {
         }
       };
       store.addManga(manga).save();
-      self.render();
+      self.setManga(manga.name);
+      self.start();
+      cb && typeof cb === 'function' && cb();
     });
   }
 
@@ -102,9 +172,9 @@ class Shelf extends View {
 
   start() {
     this.visible();
-    // this.startEvent();
-    // this.render();
-    // this.init();
+    this.startEvent();
+    this.render();
+    this.init();
   }
 }
 

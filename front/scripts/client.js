@@ -7,7 +7,7 @@ const MenuItem = remote.MenuItem;
 const win = remote.getCurrentWindow();
 const dialog = remote.dialog;
 const app = remote.app;
-const Manga = require('./scripts/modules/manga');
+// const Manga = require('./scripts/modules/manga');
 const store = require('./scripts/modules/store');
 const Shelf = require('./scripts/modules/shelf');
 const Reader = require('./scripts/modules/reader');
@@ -15,11 +15,20 @@ const Reader = require('./scripts/modules/reader');
 const shelf = new Shelf('shelf');
 const reader = new Reader('reader');
 
-// const menu = Menu.buildFromTemplate([]);
-// win.setMenu(menu);
-
 store.init();
 store.once('inited', () => {
+  if (!store.mangas || store.mangas.length === 0) {
+    const guide = document.getElementById('guide');
+    const guideBtn = document.getElementById('guideBtn');
+    guide.classList.remove('hidden');
+
+    guideBtn.addEventListener('click', () => {
+      shelf.addManga(() => guide.classList.add('hidden'));
+    });
+
+    return;
+  }
+
   if (store.state.type === 'shelf') {
     shelf.start();
   } else if (store.state.type === 'manga') {
@@ -28,9 +37,9 @@ store.once('inited', () => {
   }
 });
 
-shelf.on('read', manga => {
+shelf.on('read', (manga, reset) => {
   store.state.type = 'manga';
-  reader.start(manga);
+  reader.start(manga, reset);
 });
 
 reader.on('end', () => {

@@ -3,20 +3,58 @@
   <head>
     <meta charset="UTF-8">
     <title>Manga Mate</title>
+    <link rel="stylesheet" href="styles/webfont.css">
     <link rel="stylesheet" href="styles/index.css">
   </head>
 
   <body>
+    <div id="guide" class="guide__box hidden">
+      <h1 class="guide__title">Manga Mate</h1>
+      <a role="button" id="guideBtn" class="guide__btn">Open manga</a>
+    </div>
     <div id="shelf" class="hidden">
       <div class="shelf__box">
+        <nav class="shelf__ctrl-wrapper">
+          <ul class="shelf__ctrl">
+            <li class="shelf__ctrl-btn">
+              <a id="shelfAddBtn" class="btn__icon" role="button">
+                <span class=" icon__base icon__plus"></span>
+              </a>
+            </li>
+          </ul>
+        </nav>
         <div class="shelf__list-box">
-          <div class="shelf__ctrl">
-            <a id="shelfAddBtn" class="btn__normal" role="button">add</a>
-          </div>
           <ul id="shelfList" class="shelf__list"></ul>
         </div>
         <div class="shelf__disp__wrapper">
+          <nav>
+            <ul class="shelf__disp__nav-list">
+              <li class="shelf__disp__nav-item">
+                <a role="button" class="icon__base icon__star" data-star="5"></a>
+                <a role="button" class="icon__base icon__star" data-star="4"></a>
+                <a role="button" class="icon__base icon__star" data-star="3"></a>
+                <a role="button" class="icon__base icon__star" data-star="2"></a>
+                <a role="button" class="icon__base icon__star" data-star="1"></a>
+              </li>
+              <li class="shelf__disp__nav-item">
+                <a role="button" id="delBtn" class="icon__base icon__del"></a>
+              </li>
+            </ul>
+          </nav>
           <div id="shelfDisp" class="shelf__disp"></div>
+          <div class="shelf__meta">
+            <div id="shelfTitle" class="shelf__title"></div>
+            <nav class="shelf__meta-wrapper">
+              <ul class="shelf__meta-list">
+                <li class="shelf__meta-item">
+                  <a role="button" id="halfwayBtn" class="shelf__meta-a">続きから</a>
+                </li>
+                <li class="shelf__meta-item">
+                  <a role="button" id="beginningBtn" class="shelf__meta-a">最初から</a>
+                </li>
+              </ul>
+            </nav>
+          </div>
         </div>
       </div>
     </div>
@@ -28,5 +66,5 @@
       </div>
     </div>
   </body>
-  <script src="scripts/index.js"></script>
+  <script src="scripts/client.js"></script>
 </html>

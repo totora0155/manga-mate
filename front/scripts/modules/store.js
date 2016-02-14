@@ -7,6 +7,7 @@ const EventEmitter = require('events');
 const ev = new EventEmitter();
 const _ = require('lodash');
 const co = require('co');
+// const glob = require('glob');
 const util = require('./util');
 
 const config = {
@@ -18,13 +19,15 @@ const config = {
 
 const initData = {
   mangas: [],
-  state: {}
+  state: {
+    type: 'shelf'
+  }
 };
 
 class Store extends EventEmitter {
   constructor(data) {
     super();
-    _.merge(this, data);
+    _.assign(this, data);
   }
 
   init() {
@@ -45,6 +48,10 @@ class Store extends EventEmitter {
   addManga(manga) {
     this.mangas.push(manga);
     return this;
+  }
+
+  getManga(name) {
+    return _.find(this.mangas, {name});
   }
 
   save() {

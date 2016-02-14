@@ -4,9 +4,12 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "start": "electron main.js",
-    "build": "electron-packager . \"Manga Mate\" --platform=darwin --arch=x64 --version=0.36.0 --overwrite",
-    "firstbuild": "electron-packager . \"Manga Mate\" --platform=darwin --arch=x64 --version=0.36.0"
+    "_build:client": "chokidar src/client/*.js -c 'babel src/client/index.js -o front/scripts/client.js'",
+    "_build:main": "chokidar src/main/*.js -c 'babel src/main/index.js -o main.js'",
+    "build:electron": "electron main.js",
+    "start": "npm-run-all -p build:electron",
+    "_build": "electron-packager . \"Manga Mate\" --platform=darwin --arch=x64 --version=0.36.0 --overwrite",
+    "_firstbuild": "electron-packager . \"Manga Mate\" --platform=darwin --arch=x64 --version=0.36.0"
   },
   "repository": {
     "type": "git",
@@ -23,10 +26,14 @@
   "homepage": "https://github.com/totora0155/manga-mate#readme",
   "devDependencies": {},
   "dependencies": {
+    "babel": "^6.5.2",
+    "babel-preset-es2015": "^6.5.0",
+    "chokidar-cli": "^1.2.0",
     "co": "^4.6.0",
     "electron-prebuilt": "^0.36.7",
     "glob": "^7.0.0",
     "lodash": "^4.3.0",
-    "mkdirp": "^0.5.1"
+    "mkdirp": "^0.5.1",
+    "npm-run-all": "^1.5.1"
   }
 }

@@ -1,0 +1,1 @@
+@font-face{font-family:icons;src:url(fonts/icons.woff) format('woff');font-weight:400;font-style:normal}.icon__base:before{display:inline-block;font:1em/1 icons;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.icon__conf:before{content:"\EA01"}.icon__del:before{content:"\EA02"}.icon__plus:before{content:"\EA03"}.icon__star:before{content:"\EA04"}

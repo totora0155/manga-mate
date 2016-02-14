@@ -5,13 +5,15 @@ const co = require('co');
 const View = require('./view');
 const util = require('./util');
 const keycodes = require('./keycodes');
-var current = null;
+let current = null;
 
 class Reader extends View {
   constructor(id) {
     super(id);
     this.left = this.el.querySelector('#readerLeft');
     this.right = this.el.querySelector('#readerRight');
+    this.bindKeyHandler = _bindKeyHandler.bind(this);
+    this.swipeHandler = _swipeHandler.call(this);
   }
 
   set() {
@@ -43,42 +45,21 @@ class Reader extends View {
     this.set();
   }
 
-
-  bindKeyHandler(e) {
-    if (
-      keycodes[e.keyCode] === 'right'
-      || keycodes[e.keyCode] === 'k'
-      || (keycodes[e.keyCode] === 'n' && e.ctrlKey)
-    ) {
-      this.prev();
-      return;
-    }
-    if (
-      keycodes[e.keyCode] === 'left'
-      || keycodes[e.keyCode] === 'space'
-      || keycodes[e.keyCode] === 'j'
-      || (keycodes[e.keyCode] === 'p' && e.ctrlKey)
-    ) {
-      this.next();
-      return;
-    }
-
-    if (keycodes[e.keyCode] === 'esc') {
-      this.end();
-      return;
-    }
-  }
-
   startEvent() {
-    document.addEventListener('keydown', this.bindKeyHandler.bind(this));
+    document.addEventListener('keydown', this.bindKeyHandler);
+    window.addEventListener('wheel', this.swipeHandler);
   }
 
   endEvent() {
-    document.removeEventListener('keydown', this.bindKeyHandler.bind(this));
+    document.removeEventListener('keydown', this.bindKeyHandler);
+    window.removeEventListener('wheel', this.swipeHandler);
   }
 
-  start(manga) {
+  start(manga, reset) {
     const self = this;
+    if (reset) {
+      manga.state.currentPage = 1;
+    }
     current = manga;
     co(function* () {
       current.pages = yield util.getFilePaths(manga.dirPath);
@@ -96,3 +77,46 @@ class Reader extends View {
 }
 
 module.exports = Reader;
+
+function _bindKeyHandler(e) {
+  if (
+    keycodes[e.keyCode] === 'right'
+    || keycodes[e.keyCode] === 'k'
+    || (keycodes[e.keyCode] === 'n' && e.ctrlKey)
+  ) {
+    this.prev();
+    return;
+  }
+  if (
+    keycodes[e.keyCode] === 'left'
+    || keycodes[e.keyCode] === 'space'
+    || keycodes[e.keyCode] === 'j'
+    || (keycodes[e.keyCode] === 'p' && e.ctrlKey)
+  ) {
+    this.next();
+    return;
+  }
+
+  if (keycodes[e.keyCode] === 'esc') {
+    this.end();
+    return;
+  }
+}
+
+function _swipeHandler() {
+  let executed = false;
+  const fn = _.throttle((e) => {
+    if (Math.abs(e.deltaX) < 20) {
+      executed = false;
+    } else if (!executed) {
+      if (e.deltaX < -60) {
+        executed = true;
+        this.next();
+      } else if (e.deltaX > 60) {
+        executed = true;
+        this.prev();
+      }
+    }
+  }, 80);
+  return fn;
+}
