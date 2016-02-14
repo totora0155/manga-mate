@@ -8,6 +8,7 @@ const View = require('./view');
 const util = require('./util');
 const keycodes = require('./keycodes');
 let current = null;
+const _events = {};
 
 class Reader extends View {
   constructor(id) {
@@ -17,6 +18,8 @@ class Reader extends View {
     this.right = this.el.querySelector('#readerRight');
     this.bindKeyHandler = _bindKeyHandler.bind(this);
     this.swipeHandler = _swipeHandler.call(this);
+    _events.left = this.next.bind(this);
+    _events.right = this.prev.bind(this);
   }
 
   set() {
@@ -51,11 +54,15 @@ class Reader extends View {
   startEvent() {
     document.addEventListener('keydown', this.bindKeyHandler);
     window.addEventListener('wheel', this.swipeHandler);
+    this.left.addEventListener('click', _events.left);
+    this.right.addEventListener('click', _events.right);
   }
 
   endEvent() {
     document.removeEventListener('keydown', this.bindKeyHandler);
     window.removeEventListener('wheel', this.swipeHandler);
+    this.left.removeEventListener('click', _events.left);
+    this.right.removeEventListener('click', _events.right);
   }
 
   start(manga, reset) {
